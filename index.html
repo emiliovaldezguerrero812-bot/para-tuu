@@ -2,115 +2,64 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Para mi cachetes 💗</title>
     <style>
         body { margin: 0; background-color: #ffffff; overflow: hidden; font-family: sans-serif; }
-        #mensaje {
+        .texto {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            width: 100%;
             text-align: center;
             color: #000;
-            font-size: 50px;
             font-weight: bold;
             z-index: 10;
+            bottom: 50px; /* Lo sitúa en la parte inferior */
+            font-size: 35px;
         }
     </style>
 </head>
 <body>
 
-    <div id="mensaje">Yo cuando aprenda a programar</div>
+    <div class="texto">para mí cachetes 💗</div>
 
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
-            }
-        }
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-    <script type="module">
-        import * as THREE from 'three';
-        import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
-        import { FontLoader } from 'three/addons/loaders/FontLoader.js';
-
+    <script>
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0xffffff);
-
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        const gridHelper = new THREE.GridHelper(4, 10, 0x888888, 0xcccccc);
-        gridHelper.rotation.x = Math.PI / 2;
-        scene.add(gridHelper);
+        const grid = new THREE.GridHelper(5, 15, 0x888888, 0xcccccc);
+        grid.rotation.x = Math.PI / 2;
+        scene.add(grid);
 
-        const points = [];
-        for (let x = -1.5; x <= 1.5; x += 0.1) {
-            for (let y = -1.5; y <= 1.5; y += 0.1) {
-                for (let z = -1.5; z <= 1.5; z += 0.1) {
-                    const equation = Math.pow(x*x + (9/4)*y*y + z*z - 1, 3) - x*x*Math.pow(z, 3) - (9/80)*y*y*Math.pow(z, 3);
-                    if (equation <= 0 && equation > -0.1) {
-                        points.push(new THREE.Vector3(x, y, z));
+        const vertices = [];
+        for (let x = -1.5; x <= 1.5; x += 0.08) {
+            for (let y = -1.5; y <= 1.5; y += 0.08) {
+                for (let z = -1.5; z <= 1.5; z += 0.08) {
+                    const x2 = x*x, y2 = y*y, z2 = z*z;
+                    if (Math.pow(x2 + (9/4)*y2 + z2 - 1, 3) - x2*Math.pow(z, 3) - (9/80)*y2*Math.pow(z, 3) <= 0) {
+                        vertices.push(x, y, z);
                     }
                 }
             }
         }
 
-        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
         const material = new THREE.PointsMaterial({ color: 0xff0000, size: 0.03 });
         const heart = new THREE.Points(geometry, material);
-        
         heart.rotation.x = -Math.PI / 2;
         scene.add(heart);
 
-        const loader = new FontLoader();
-        loader.load( 'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function ( font ) {
-            const textGeometry = new TextGeometry( 'para mí cachetes', {
-                font: font,
-                size: 0.2,
-                height: 0.05,
-                curveSegments: 12,
-                bevelEnabled: true,
-                bevelThickness: 0.01,
-                bevelSize: 0.005,
-                bevelOffset: 0,
-                bevelSegments: 5
-            } );
-            const textMaterial = new THREE.MeshBasicMaterial({color: 0x000000});
-            const textMesh = new THREE.Mesh(textGeometry, textMaterial);
-            textMesh.position.set(-1.3, -1.8, 0); // Ajusta la posición del texto
-            scene.add(textMesh);
-        });
-
-        const emojiLoader = new FontLoader();
-        emojiLoader.load( 'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function ( font ) {
-            const emojiGeometry = new TextGeometry( '💗', {
-                font: font,
-                size: 0.5,
-                height: 0.05,
-                curveSegments: 12,
-                bevelEnabled: true,
-                bevelThickness: 0.01,
-                bevelSize: 0.005,
-                bevelOffset: 0,
-                bevelSegments: 5
-            } );
-            const emojiMaterial = new THREE.MeshBasicMaterial({color: 0xff69b4});
-            const emojiMesh = new THREE.Mesh(emojiGeometry, emojiMaterial);
-            emojiMesh.position.set(-0.3, 0.5, 0); // Ajusta la posición del emoji
-            scene.add(emojiMesh);
-        });
-
-        camera.position.set(2, 2, 4);
+        camera.position.set(2, 2, 3);
         camera.lookAt(0, 0, 0);
 
         function animate() {
             requestAnimationFrame(animate);
-            heart.rotation.z += 0.01;
+            heart.rotation.z += 0.015;
             renderer.render(scene, camera);
         }
 
